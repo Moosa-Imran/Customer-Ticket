@@ -1,0 +1,112 @@
+<nav
+class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
+<div class="flex flex-wrap justify-between items-center">
+  <!-- Left Section (Logo and Drawer Button) -->
+  <div class="flex justify-start items-center">
+    <!-- Drawer Button -->
+    <button data-drawer-target="drawer-navigation" data-drawer-toggle="drawer-navigation"
+      aria-controls="drawer-navigation"
+      class="p-2 mr-2 text-gray-600 rounded-lg cursor-pointer md:hidden hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700 focus:ring-2 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+      <i class="fa-solid fa-bars-staggered text-gray-500 transition duration-75 dark:text-gray-400"></i>
+      <span class="sr-only">My Online Prep</span>
+    </button>
+
+    <!-- Logo -->
+    <a href="https://romanianworkers.co.uk/" class="flex items-center justify-between mr-4">
+    <img src="img/logo.png" class="mr-3 h-10" alt="Logo" />
+    </a>
+  </div>
+
+  <!-- Right Section (User, Notifications, Theme Toggle) -->
+  <div class="flex items-center lg:order-2">
+    <!-- Notifications Button -->
+    <button type="button" data-dropdown-toggle="notification-dropdown"
+      class="p-2 mr-1 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
+      <span class="sr-only">View notifications</span>
+      <i class="fa-solid fa-bell fa-xl fa-s-screen"></i>
+    </button>
+
+    <!-- Notification Dropdown -->
+    <div
+      class="hidden overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700 rounded-xl"
+      id="notification-dropdown">
+      <div
+        class="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300">
+        Notifications
+      </div>
+      <div>
+        <!-- Notification item for upcoming test -->
+        <a href="#" class="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
+          <div class="flex-shrink-0">
+            <!-- Optional: Add an icon or image related to tests here -->
+            <i class="fa-solid fa-calendar-day fa-lg text-primary-600 dark:text-primary-500"></i>
+          </div>
+          <div class="pl-3 w-full">
+            <div class="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
+              Your test is scheduled for
+              <span class="font-semibold text-gray-900 dark:text-white">
+                25th September
+              </span>.
+            </div>
+            <div class="text-xs font-medium text-primary-600 dark:text-primary-500">
+              Upcoming soon
+            </div>
+          </div>
+        </a>
+      </div>
+      <a href="#"
+        class="block py-2 text-md font-medium text-center text-gray-900 bg-gray-50 hover:bg-gray-100 dark:bg-gray-600 dark:text-white dark:hover:underline">
+        <div class="inline-flex items-center">
+          <i class="fa-solid fa-eye fa-lg"></i>
+          View all
+        </div>
+      </a>
+    </div>
+
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle"
+      class=" text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2">
+      <i id="theme-toggle-icon" class="fa-solid fa-sun fa-xl fa-s-screen"></i>
+    </button>
+
+    <!-- User Profile Button -->
+    <button type="button"
+      class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+      id="user-menu-button" aria-expanded="false" data-dropdown-toggle="dropdown">
+      <span class="sr-only">Open user menu</span>
+      <img class="img-screen w-8 h-8 rounded-full" src="/img/profile.png" alt="user photo" />
+    </button>
+
+    <!-- User Dropdown Menu -->
+    <div
+      class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
+      id="dropdown">
+      <div class="py-3 px-4">
+        <span class="user-name block text-sm font-semibold text-gray-900 dark:text-white">
+          <%= user.fullName %>
+        </span>
+        <span class="user-email block text-sm text-gray-900 truncate dark:text-white">
+          <%= user.email %>
+        </span>
+      </div>
+      <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
+        <li>
+          <a href="/settings"
+            class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">
+            My profile
+          </a>
+        </li>
+      </ul>
+      <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
+        <li>
+          <a href="#"
+            class="logout block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+            Sign out
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+</nav>

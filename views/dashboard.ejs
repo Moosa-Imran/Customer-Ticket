@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning Box - MyOnlinePrep</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+</head>
+<link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body>
+  <div id="loader">
+    <span class="loader"></span>
+  </div>
+
+  <div class="antialiased bg-gray-50 dark:bg-gray-900">
+
+    <!-- Navbar -->
+    <%- include('components/navbar') %>
+      <!-- Sidebar -->
+      <%- include('components/sidebar') %>
+
+        <main class="main p-4 md:ml-64 h-screen min-h-screen pt-20 bg-gray-50 dark:bg-gray-900">
+          <!-- Header Section -->
+          <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+            <div>
+              <h1 class="text-4xl font-bold text-black dark:text-white">
+                Welcome Back, <span class="text-[#3A4A8A] username">
+                  <%= user.fullName %>
+                </span>
+              </h1>
+              <p class="text-lg text-gray-600 dark:text-gray-300">Manage your tickets efficiently and stay updated!</p>
+            </div>
+            <div class="flex items-center mt-4 md:mt-0">
+              <div class="text-lg text-gray-800 dark:text-gray-200">
+                Total Tickets: <span class="font-bold text-[#3A4A8A] total-tickets">
+                  <%= ticketsData.totalTickets %>
+                </span>
+              </div>
+              <button
+                class="ml-4 bg-[#3A4A8A] text-white px-4 py-2 rounded-md shadow-md hover:bg-[#2E376F] transition duration-200">
+                <a href="create-ticket">Create New Ticket</a>
+              </button>
+            </div>
+          </div>
+
+          <!-- Main Dashboard Sections -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Ticket Summary Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Ticket Summary</h2>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600 dark:text-gray-400">Open Tickets</span>
+                  <span class="font-bold text-lg text-[#3A4A8A] open-tickets">
+                    <%= ticketsData.openTickets %>
+                  </span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600 dark:text-gray-400">Resolved Tickets</span>
+                  <span class="font-bold text-lg text-[#3A4A8A] resolved-tickets">
+                    <%= ticketsData.resolvedTickets %>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- My Tickets Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h2 class="text-xxl font-semibold text-gray-800 dark:text-gray-200 mb-4">My Tickets</h2>
+
+              <% if (ticketsData.tickets.length === 0) { %>
+              <p class="text-gray-600 dark:text-gray-400">No tickets available.</p>
+              <% } else { %>
+              <div class="space-y-4">
+                <% ticketsData.tickets.forEach(ticket => { %>
+                <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-md flex justify-between items-center">
+                  <div>
+                  <h3 class="font-semibold text-lg text-gray-800 dark:text-gray-200">
+                    <%= ticket.serviceType %>
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-400">Date:
+                    <span class="font-bold text-[#3A4A8A]">
+                    <%= ticket.createdAt.toDateString() %>
+                    </span>
+                  </p>
+                  <p class="text-gray-600 dark:text-gray-400">Status:
+                    <span class="font-bold text-[#3A4A8A]">
+                    <%= ticket.status %>
+                    </span>
+                  </p>
+                  </div>
+                  <button
+                  class="bg-[#3A4A8A] text-white px-4 py-2 rounded-md shadow-md hover:bg-[#2E376F] transition duration-200">
+                  <a href="<%= ticket.status === 'Resolved' ? '/reopen-ticket?tid=' + encodeURIComponent(ticket.ticketNo) : '/ticket?tid=' + encodeURIComponent(ticket.ticketNo) %>">
+                    <%= ticket.status === 'Resolved' ? 'Open Again' : 'View' %>
+                  </a>
+                  </button>
+                </div>
+                <% }) %>
+              </div>
+              <% } %>
+            </div>
+
+
+          </div>
+        </main>
+
+  </div>
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
+  <script src="js/flowbite.js"></script>
+  <script src="js/dashboard.js"></script>
+
+</body>
+
+</html>

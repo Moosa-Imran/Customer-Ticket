@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Profile - MyOnlinePrep</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css"rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+  </head>
+  <style>
+    #loader{
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 50%;
+    }
+    .blur{
+     filter: blur(8px) !important;
+    }
+    .hidden{
+      display: none;
+    }
+    .loader {
+      --c1:#673b14;
+      --c2:#f8b13b;
+      width: 40px;
+      height: 80px;
+      border-top: 4px solid var(--c1);
+      border-bottom: 4px solid var(--c1);
+      background: linear-gradient(90deg, var(--c1) 2px, var(--c2) 0 5px,var(--c1) 0) 50%/7px 8px no-repeat;
+      display: grid;
+      overflow: hidden;
+      animation: l5-0 2s infinite linear;
+    }
+    .loader::before,
+    .loader::after {
+      content: "";
+      grid-area: 1/1;
+      width: 75%;
+      height: calc(50% - 4px);
+      margin: 0 auto;
+      border: 2px solid var(--c1);
+      border-top: 0;
+      box-sizing: content-box;
+      border-radius: 0 0 40% 40%;
+      -webkit-mask: 
+        linear-gradient(#000 0 0) bottom/4px 2px no-repeat,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: destination-out;
+              mask-composite: exclude;
+      background: 
+        linear-gradient(var(--d,0deg),var(--c2) 50%,#0000 0) bottom /100% 205%,
+        linear-gradient(var(--c2) 0 0) center/0 100%;
+      background-repeat: no-repeat;
+      animation: inherit;
+      animation-name: l5-1;
+    }
+    .loader::after {
+      transform-origin: 50% calc(100% + 2px);
+      transform: scaleY(-1);
+      --s:3px;
+      --d:180deg;
+    }
+    @keyframes l5-0 {
+      80%  {transform: rotate(0)}
+      100% {transform: rotate(0.5turn)}
+    }
+    @keyframes l5-1 {
+      10%,70%  {background-size:100% 205%,var(--s,0) 100%}
+      70%,100% {background-position: top,center}
+    }
+    @media (max-width: 440px) {
+      .nav-title {
+        font-size: 1rem !important;
+      }
+    }
+    
+    @media (max-width: 440px) {
+      .fa-s-screen {
+        font-size: 1rem !important; 
+      }
+    }
+    
+    @media (max-width: 440px) {
+      .img-screen {
+        height: 1.5rem !important; 
+        width: 1.5rem !important; 
+      }
+    }
+    
+    
+        </style>
+      </head>
+    
+      <body>
+        <div id="loader">
+          <span class="loader"></span> 
+          </div>
+        <div class="antialiased bg-gray-50 dark:bg-gray-900 blur">
+          <nav
+          class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50"
+        >
+          <div class="flex flex-wrap justify-between items-center">
+            <!-- Left Section (Logo and Drawer Button) -->
+            <div class="flex justify-start items-center">
+              <!-- Drawer Button -->
+              <button
+                data-drawer-target="drawer-navigation"
+                data-drawer-toggle="drawer-navigation"
+                aria-controls="drawer-navigation"
+                class="p-2 mr-2 text-gray-600 rounded-lg cursor-pointer md:hidden hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700 focus:ring-2 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+              >
+                <i class="fa-solid fa-bars-staggered text-gray-500 transition duration-75 dark:text-gray-400"></i>
+                <span class="sr-only">My Online Prep</span>
+              </button>
+        
+              <!-- Logo -->
+              <a href="/" class="flex items-center justify-between mr-4">
+                <img
+                  src="img/Logo.png"
+                  class="mr-3 h-8"
+                  alt="MyOnlinePrep Logo"
+                />
+                <span class="nav-title self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
+                  My Online Prep
+                </span>
+              </a>
+            </div>
+        
+            <!-- Right Section (User, Notifications, Theme Toggle) -->
+            <div class="flex items-center lg:order-2">
+              <!-- Notifications Button -->
+              <button
+                type="button"
+                data-dropdown-toggle="notification-dropdown"
+                class="p-2 mr-1 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+              >
+                <span class="sr-only">View notifications</span>
+                <i class="fa-solid fa-bell fa-xl fa-s-screen"></i>
+              </button>
+        
+    <!-- Notification Dropdown -->
+    <div
+      class="hidden overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:divide-gray-600 dark:bg-gray-700 rounded-xl"
+      id="notification-dropdown"
+    >
+      <div class="block py-2 px-4 text-base font-medium text-center text-gray-700 bg-gray-50 dark:bg-gray-600 dark:text-gray-300">
+        Notifications
+      </div>
+      <div>
+        <!-- Notification item for upcoming test -->
+        <a href="#" class="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
+          <div class="flex-shrink-0">
+            <!-- Optional: Add an icon or image related to tests here -->
+            <i class="fa-solid fa-calendar-day fa-lg text-primary-600 dark:text-primary-500"></i>
+          </div>
+          <div class="pl-3 w-full">
+            <div class="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
+              Your test is scheduled for
+              <span class="font-semibold text-gray-900 dark:text-white">
+                25th September
+              </span>.
+            </div>
+            <div class="text-xs font-medium text-primary-600 dark:text-primary-500">
+              Upcoming soon
+            </div>
+          </div>
+        </a>
+      </div>
+      <a
+        href="#"
+        class="block py-2 text-md font-medium text-center text-gray-900 bg-gray-50 hover:bg-gray-100 dark:bg-gray-600 dark:text-white dark:hover:underline"
+      >
+        <div class="inline-flex items-center">
+          <i class="fa-solid fa-eye fa-lg"></i>
+          View all
+        </div>
+      </a>
+    </div>
+    
+        
+              <!-- Theme Toggle Button -->
+              <button id="theme-toggle" class=" text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2">
+                <i id="theme-toggle-icon" class="fa-solid fa-sun fa-xl fa-s-screen"></i>
+              </button>
+        
+              <!-- User Profile Button -->
+              <button
+                type="button"
+                class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                id="user-menu-button"
+                aria-expanded="false"
+                data-dropdown-toggle="dropdown"
+              >
+                <span class="sr-only">Open user menu</span>
+                <img class="img-screen w-8 h-8 rounded-full" src="/img/Profile.png" alt="user photo"/>
+              </button>
+        
+              <!-- User Dropdown Menu -->
+              <div
+                class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
+                id="dropdown"
+              >
+                <div class="py-3 px-4">
+                  <span class="user-name block text-sm font-semibold text-gray-900 dark:text-white">
+                    Name
+                  </span>
+                  <span class="user-email block text-sm text-gray-900 truncate dark:text-white">
+                    name@gmail.com
+                  </span>
+                </div>
+                <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
+                  <li>
+                    <a
+                      href="user.html"
+                      class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
+                    >
+                      My profile
+                    </a>
+                  </li>
+                </ul>
+                <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
+                  <li>
+                    <a
+                      href="#"
+                      class="logout block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                    >
+                      Sign out
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+      <!-- Sidebar -->
+
+      <aside
+        class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+        aria-label="Sidenav"
+        id="drawer-navigation"
+      >
+        <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
+          <ul class="space-y-2">
+            <li>
+              <a
+                href="/dashboard.html"
+                class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              >
+                <i
+                  class="fa-solid fa-house fa-xl text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                ></i>
+                <span class="ml-3">Home</span>
+              </a>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                aria-controls="dropdown-pages"
+                data-collapse-toggle="dropdown-pages"
+              >
+                <i
+                  class="fa-solid fa-book fa-xl text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                ></i>
+                <span class="flex-1 ml-3 text-left whitespace-nowrap"
+                  >Tests</span
+                >
+                <i
+                  class="fa-solid fa-chevron-down text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                ></i>
+              </button>
+              <ul id="dropdown-pages" class="hidden py-2 space-y-2">
+                <li>
+                  <a
+                    href="/subject.html"
+                    class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >Take Test</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="/blogs/nust-past-papers.html"
+                    class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >Past Papers</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="/subject.html"
+                    class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >Custom Test</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                aria-controls="dropdown-authentication"
+                data-collapse-toggle="dropdown-authentication"
+              >
+                <i
+                  class="fa-solid fa-screwdriver-wrench fa-xl text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                ></i>
+                <span class="flex-1 ml-3 text-left whitespace-nowrap"
+                  >Tools</span
+                >
+                <i
+                  class="fa-solid fa-chevron-down text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                ></i>
+              </button>
+              <ul id="dropdown-authentication" class="hidden py-2 space-y-2">
+                <li>
+                  <a
+                    href="#"
+                    class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >Aggregate Calculator</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="https://www.calculator.net/scientific-calculator.html"
+                    class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >Scientific Calculator</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >AI Teacher</a
+                  >
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <ul
+            class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700"
+          >
+            <li>
+              <a
+                href="/user.html"
+                class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
+              >
+                <i
+                  class="fa-solid fa-gear fa-xl text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                ></i>
+                <span class="ml-3">Settings</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
+              >
+                <i
+                  class="fa-solid fa-headphones fa-xl text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                ></i>
+                <span class="ml-3">Contact Us</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="contact.html"
+                class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
+              >
+                <i
+                  class="fa-solid fa-circle-info fa-xl text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                ></i>
+                <span class="ml-3">Help</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <main class="main p-4 md:ml-64 h-auto pt-20 bg-gray-50 dark:bg-gray-900">
+        <div class="bg-gray-100 dark:bg-gray-900 text-black dark:text-white">
+          <div class="container mx-auto py-2">
+            <!-- User settings header -->
+            <div class="mb-6">
+              <h1 class="text-3xl font-bold">User settings</h1>
+            </div>
+      
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- Profile Picture Section -->
+              <div class="bg-gray-200 dark:bg-gray-800 p-6 rounded-lg flex flex-col items-center">
+                <img src="img/Profile.png" alt="User Profile" class="w-32 h-32 rounded-full mb-4">
+                <h2 class="user-name text-xl font-semibold">Name</h2>
+                <p class="text-gray-500 dark:text-gray-400">NET-1 Student</p>
+                <button class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg">Change picture</button>
+              </div>
+      
+              <!-- General Information Form -->
+              <div class="md:col-span-2 bg-gray-200 dark:bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">General information</h2>
+                <form action="#">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="full-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name *</label>
+                      <input type="text" id="full-name" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div>
+                      <label for="father-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Father Name *</label>
+                      <input type="text" id="father-name" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div>
+                      <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gender *</label>
+                      <select id="gender" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500 h-[42px] pl-3">
+                        <option value="" disabled selected>Choose Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>                                                     
+                    <div>
+                      <label for="board" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Board *</label>
+                      <select id="board" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500 h-[42px] pl-3">
+                        <option value="" disabled selected>Select Board</option>
+                        <option value="Multan">Multan Board</option>
+                        <option value="Lahore">Lahore Board</option>
+                      </select>
+                    </div>                    
+                    <div>
+                      <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email *</label>
+                      <input type="email" id="email" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div>
+                      <label for="phone-number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number *</label>
+                      <input type="text" id="phone-number" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div>
+                      <label for="dob" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date of Birth *</label>
+                      <input type="date" id="dob" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500 h-[42px] pl-3">
+                    </div>                    
+                    <div>
+                      <label for="institute" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Institute</label>
+                      <input type="text" id="institute" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                  </div>
+                  <div class="mt-4">
+                    <button type="submit" id="save-all" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Save all</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+      
+            <!-- Password Information Form -->
+            <div class="bg-gray-200 dark:bg-gray-800 p-6 rounded-lg mt-6">
+              <h2 class="text-xl font-semibold mb-4">Password information</h2>
+              <form action="#">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="current-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current password</label>
+                    <input type="password" id="current-password" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500">
+                  </div>
+                  <div>
+                    <label for="new-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">New password</label>
+                    <input type="password" id="new-password" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500">
+                  </div>
+                  <div>
+                    <label for="confirm-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm password</label>
+                    <input type="password" id="confirm-password" class="mt-1 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-black dark:text-white focus:border-blue-500 focus:ring-blue-500">
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <button type="submit" id="change-pass" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Change</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>  
+      </main>
+      
+      
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script src="js/flowbite.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+      $(document).ready(function() {
+        
+        const notyf = new Notyf({
+          position: {
+            x: 'right',
+            y: 'top',
+          },
+        });
+    
+        async function fetchData() {
+          try {
+            const response = await fetch('/api/username');
+            if (response.ok) {
+              const data = await response.json();
+              
+              // Set default values for inputs
+              $('#full-name').val(data.user.username);
+              $('#father-name').val(data.user.fathername);
+              $('#email').val(data.user.email);
+              $('#phone-number').val(data.user.phone);
+              $('#institute').val(data.user.institute);
+              $('#gender').val(data.user.gender); 
+              $('#board').val(data.user.data.board); 
+              $('#dob').val(data.user.dob);
+        
+              // Remove Loader
+              $('#loader').addClass("hidden");
+              $('.antialiased').removeClass("blur");
+        
+            } else {
+              console.error('Failed to fetch user data');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+          }
+        }
+    
+        function validateEmail(email) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(email);
+        }
+    
+        function validatePhoneNumber(phoneNumber) {
+          const phoneRegex = /^\d{11}$/; // 11 digits required
+          return phoneRegex.test(phoneNumber);
+        }
+    
+        function validateDOB(dob) {
+          const currentDate = new Date();
+          const dobDate = new Date(dob);
+          const ageDiff = currentDate.getFullYear() - dobDate.getFullYear();
+          const monthDiff = currentDate.getMonth() - dobDate.getMonth();
+          const dayDiff = currentDate.getDate() - dobDate.getDate();
+    
+          if (ageDiff > 12) {
+            return true;
+          } else if (ageDiff === 12 && (monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0))) {
+            return true;
+          }
+          return false;
+        }
+    
+        function validateForm() {
+          const fullName = $('#full-name').val();
+          const fatherName = $('#father-name').val();
+          const email = $('#email').val();
+          const phoneNumber = $('#phone-number').val();
+          const gender = $('#gender').val();
+          const board = $('#board').val();
+          const dob = $('#dob').val();
+          
+          // Validate required fields
+          if (!fullName) {
+            notyf.error("Full Name is required.");
+            return false;
+          }
+          if (!fatherName) {
+            notyf.error("Father Name is required.");
+            return false;
+          }
+          if (!email) {
+            notyf.error("Email is required.");
+            return false;
+          }
+          if (!validateEmail(email)) {
+            notyf.error("Please enter a valid email address.");
+            return false;
+          }
+          if (!phoneNumber) {
+            notyf.error("Phone Number is required.");
+            return false;
+          }
+          if (!validatePhoneNumber(phoneNumber)) {
+            notyf.error("Phone Number must be exactly 11 digits.");
+            return false;
+          }
+          if (!gender) {
+            notyf.error("Gender is required.");
+            return false;
+          }
+          if (!board) {
+            notyf.error("Board is required.");
+            return false;
+          }
+          if (!dob) {
+            notyf.error("Date of Birth is required.");
+            return false;
+          }
+          if (!validateDOB(dob)) {
+            notyf.error("You must be at least 12 years old.");
+            return false;
+          }
+    
+          return true;
+        }
+    
+        async function updateData() {
+          const dataToUpdate = {
+            username: $('#full-name').val(),
+            fathername: $('#father-name').val(),
+            email: $('#email').val(),
+            phone: $('#phone-number').val(),
+            institute: $('#institute').val(), // This field is not required but will still be sent
+            gender: $('#gender').val(),
+            board: $('#board').val(),
+            dob: $('#dob').val()
+          };
+    
+          try {
+            const response = await fetch('/api/update-user', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(dataToUpdate)
+            });
+    
+            if (response.ok) {
+              notyf.success("Data updated successfully!");
+            } else {
+              console.error('Failed to update user data');
+              notyf.error("Failed to update data. Please try again.");
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            notyf.error("An error occurred while updating the data.");
+          }
+        }
+
+// Validate password fields
+function validatePasswordForm() {
+  const currentPassword = $('#current-password').val();
+  const newPassword = $('#new-password').val();
+  const confirmPassword = $('#confirm-password').val();
+
+  if (!currentPassword) {
+    notyf.error('Current password is required.');
+    return false;
+  }
+  if (!newPassword) {
+    notyf.error('New password is required.');
+    return false;
+  }
+  if (!confirmPassword) {
+    notyf.error('Please confirm your new password.');
+    return false;
+  }
+  if (newPassword !== confirmPassword) {
+    notyf.error('New password and confirmation password do not match.');
+    return false;
+  }
+  if (newPassword.length < 8) {
+    notyf.error('New password must be at least 8 characters long.');
+    return false;
+  }
+
+  return true;
+}
+
+// Handle password form submission
+$('#change-pass').on('click', async function (e) {
+  e.preventDefault();
+
+  // Validate the form fields
+  if (!validatePasswordForm()) {
+    return;
+  }
+
+  const dataToUpdate = {
+    currentPassword: $('#current-password').val(),
+    newPassword: $('#new-password').val(),
+  };
+
+  try {
+    const response = await fetch('/api/update-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dataToUpdate),
+    });
+
+    if (response.ok) {
+      notyf.success('Password updated successfully!');
+    } else {
+      const errorData = await response.json(); // Get the error message from the response
+      if (errorData.message === 'Current password is incorrect') {
+        notyf.error('Current password is incorrect.');
+      } else {
+        notyf.error('Failed to update password. Please try again.');
+      }
+    }
+  } catch (error) {
+    notyf.error('An error occurred while updating the password.');
+  }
+});
+
+        
+        // Handle form submission
+        $('#save-all').click(function(e) {
+          e.preventDefault();
+    
+          // Validate form fields
+          if (validateForm()) {
+            // If validation passes, update the data
+            updateData();
+          }
+        });
+    
+        fetchData();
+      });
+    </script>
+    
+    
+  </body>
+</html>
+
