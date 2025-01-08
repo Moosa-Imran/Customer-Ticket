@@ -80,6 +80,19 @@
                         />
                     </div>
     
+                    <!-- Occupation Field -->
+                    <div class="flex flex-col">
+                        <label for="occupation" class="text-gray-600 dark:text-gray-400 mb-2">Occupation</label>
+                        <input
+                            type="text"
+                            id="occupation"
+                            name="occupation"
+                            class="p-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3A4A8A]"
+                            placeholder="Enter your occupation"
+                            required
+                        />
+                    </div>
+
                     <!-- Address Field -->
                     <div class="flex flex-col">
                         <label for="address" class="text-gray-600 dark:text-gray-400 mb-2">Address</label>
@@ -93,6 +106,21 @@
                         />
                     </div>
     
+                    <!-- Marital Status Type Selection -->
+                    <div class="flex flex-col">
+                        <label for="maritalStatus" class="text-gray-600 dark:text-gray-400 mb-2">Select Service</label>
+                        <select
+                            id="maritalStatus"
+                            name="maritalStatus"
+                            class="p-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3A4A8A]"
+                            required
+                        >
+                            <option value="">Select Status</option>
+                            <option value="single">Single</option>
+                            <option value="married">Married</option>
+                        </select>
+                    </div>
+
                     <!-- Service Type Selection -->
                     <div class="flex flex-col">
                         <label for="serviceType" class="text-gray-600 dark:text-gray-400 mb-2">Select Service</label>
@@ -302,6 +330,8 @@
             email: $('#email').val(),
             phoneNumber: $('#phoneNumber').val(),
             address: $('#address').val(),
+            serviceType: $('#occupation').val(),
+            serviceType: $('#maritalStatus').val(),
             serviceType: $('#serviceType').val(),
             subService: $('#subService').val(),
             description: $('#description').val(),

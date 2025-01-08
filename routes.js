@@ -214,7 +214,6 @@ router.post('/ticket/:ticketNo/message', async (req, res) => {
     }
 });
 
-
 // Route for Logout
 router.post('/logout', (req, res) => {
     req.session.destroy(err => {
@@ -225,7 +224,6 @@ router.post('/logout', (req, res) => {
         res.status(200).json({logout: true, message: 'Logout successful!' });
     });
 });
-
 
 // Dashboard Route
 router.get('/dashboard', isAuthenticated, async (req, res) => {
@@ -294,8 +292,6 @@ router.get('/ticket', async (req, res) => {
         res.status(500).render('error', { message: 'Something went wrong, please try again later.' });
     }
 });
-
-
 
 router.get('/settings', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'settings.html'));
