@@ -203,7 +203,6 @@ router.post('/ticket/:ticketNo/message', async (req, res) => {
         // Push the new message to the conversation array
         await req.app.locals.ticketsDb.collection('All').updateOne(
             { ticketNo },
-            { status: 'Open' },
             { $push: { conversation: newMessage } }
         );
 
@@ -223,7 +222,7 @@ router.post('/logout', (req, res) => {
             return res.status(500).json({ message: 'Logout failed. Please try again later.' });
         }
         res.clearCookie('connect.sid'); 
-        res.status(200).json({ message: 'Logout successful!' });
+        res.status(200).json({logout: true, message: 'Logout successful!' });
     });
 });
 

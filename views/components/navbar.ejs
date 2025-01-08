@@ -101,10 +101,31 @@ class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:borde
       <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
         <li>
           <a href="#"
-            class="logout block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+            id="logout" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
             Sign out
           </a>
         </li>
+        <script>
+          document.getElementById('logout').addEventListener('click', function(e){
+              e.preventDefault();
+              fetch('/logout', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                      logout: true
+                  })
+              })
+              .then(res => res.json())
+              .then(data => {
+                  if(data.logout){
+                      window.location.href = 'https://romanianworkers.co.uk/';
+                  }
+              })
+              .catch(err => console.log(err));
+          });
+      </script>
       </ul>
     </div>
   </div>
