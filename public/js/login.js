@@ -15,7 +15,7 @@ $(document).ready(function () {
         });
 
     // Sign Up Function
-    $('#signup-btn').click(function (e) {
+    $('.signup-form').submit(function (e) {
         e.preventDefault();
 
         const fullName = $('#signup-name').val().trim();
@@ -73,11 +73,11 @@ $(document).ready(function () {
 
 
 
-    $('#signin-btn').click(function (e) {
+    $('.signin-form').submit(function (e) {
         e.preventDefault();
 
-        const email = $('#signin-envelope').val().trim();
-        const password = $('#signin-password').val().trim();
+        const email = $('#email').val().trim();
+        const password = $('#password').val().trim();
 
         if (!email || !password) {
             iziToast.error({ title: 'Error', message: 'Email and password are required!' });
@@ -108,14 +108,4 @@ $(document).ready(function () {
         });
     });
 
-
-    // Toggle Function
-    let $container = $('#container');
-    window.toggle = function () {
-        $container.toggleClass('sign-in');
-        $container.toggleClass('sign-up');
-    };
-    setTimeout(function () {
-        $container.addClass('sign-in');
-    }, 200);
 });
