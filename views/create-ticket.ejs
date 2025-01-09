@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Learning Box - MyOnlinePrep</title>
+  <title>Create Ticket</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 </head>
@@ -108,7 +108,7 @@
     
                     <!-- Marital Status Type Selection -->
                     <div class="flex flex-col">
-                        <label for="maritalStatus" class="text-gray-600 dark:text-gray-400 mb-2">Select Service</label>
+                        <label for="maritalStatus" class="text-gray-600 dark:text-gray-400 mb-2">Select Marital Status</label>
                         <select
                             id="maritalStatus"
                             name="maritalStatus"
@@ -116,8 +116,8 @@
                             required
                         >
                             <option value="">Select Status</option>
-                            <option value="single">Single</option>
-                            <option value="married">Married</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
                         </select>
                     </div>
 
@@ -131,14 +131,14 @@
                             required
                         >
                             <option value="">Select Service</option>
-                            <option value="accounting">Accounting Services</option>
-                            <option value="legal">Legal Services</option>
-                            <option value="immigration">Personal Immigration</option>
-                            <option value="personalInjury">Personal Injury</option>
-                            <option value="accidentalClaim">Accidental Claim Services</option>
-                            <option value="family">Family Services</option>
-                            <option value="motoringLaw">Motoring Law</option>
-                            <option value="other">Other Services</option>
+                            <option value="Accounting">Accounting Services</option>
+                            <option value="Legal">Legal Services</option>
+                            <option value="Immigration">Personal Immigration</option>
+                            <option value="Personal_Injury">Personal Injury</option>
+                            <option value="Accidental_Claim">Accidental Claim Services</option>
+                            <option value="Family">Family Services</option>
+                            <option value="Motoring_Law">Motoring Law</option>
+                            <option value="Other">Other Services</option>
                         </select>
                     </div>
     
@@ -166,6 +166,17 @@
                             required
                         ></textarea>
                     </div>
+
+                    <!-- File -->
+                    <div class="flex flex-col">
+                        <label for="file" class="text-gray-600 dark:text-gray-400 mb-2">Attach File (Optional)</label>
+                        <input
+                            type="file"
+                            id="file"
+                            name="file"
+                            accept="image/*,application/pdf"
+                            class="p-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3A4A8A]"
+                        />
     
                     <!-- Submit Button -->
                     <div class="mt-4">
@@ -187,7 +198,7 @@
             const subServiceSelect = document.getElementById('subService');
     
             const subServices = {
-                accounting: [
+                Accounting: [
                     "Cloud Accounting",
                     "Account Management",
                     "CIS Tax Returns",
@@ -195,18 +206,18 @@
                     "Payroll Services",
                     "VAT Returns Service"
                 ],
-                legal: [
+                Legal: [
                     "Data Claims",
                     "Debt & Insolvency",
                     "Education Law Services"
                 ],
-                immigration: [
+                Immigration: [
                     "In-Country Applications",
                     "Out of Country Applications",
                     "Business Immigration",
                     "Immigration Appeals"
                 ],
-                personalInjury: [
+                Personal_Injury: [
                     "Abuse Claims",
                     "Cycling Accident Claims",
                     "Spinal Cord Injury Claims",
@@ -222,14 +233,14 @@
                     "Road Traffic Accidents Solicitors",
                     "Post Traumatic Stress Disorder Claims"
                 ],
-                accidentalClaim: [
+                Accidental_Claim: [
                     "Car Accident Claims",
                     "Cycling Accident Claims",
                     "Passenger Accident Claims",
                     "Pedestrian Accident Claims",
                     "Motorbike Accident Claims"
                 ],
-                family: [
+                Family: [
                     "Divorce Solicitors",
                     "High Net Worth Divorce",
                     "Court of Protection and Deprivation of Liberty in Family Law",
@@ -240,7 +251,7 @@
                     "International Family Lawyers",
                     "Islamic Law"
                 ],
-                motoringLaw: [
+                Motoring_Law: [
                     "Dangerous Driving",
                     "Drink or Drug Driving Allegation After Being Taken to Hospital",
                     "Drink Driving Allegation with a Sample of Blood or Urine",
@@ -254,7 +265,7 @@
                     "Dangerous Driving Allegation",
                     "Motoring Offences"
                 ],
-                other: [
+                Other: [
                     "Welfare Benefits",
                     "Universal Credit",
                     "Tribunal Hearings",
@@ -319,29 +330,37 @@
 <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
 
 <script>
-    $(document).ready(function() {
+$(document).ready(function() {
     // Handle form submission
     $('form').submit(function(event) {
         event.preventDefault(); // Prevent form from submitting normally
 
         // Collect form data
-        const formData = {
-            fullName: $('#fullName').val(),
-            email: $('#email').val(),
-            phoneNumber: $('#phoneNumber').val(),
-            address: $('#address').val(),
-            serviceType: $('#occupation').val(),
-            serviceType: $('#maritalStatus').val(),
-            serviceType: $('#serviceType').val(),
-            subService: $('#subService').val(),
-            description: $('#description').val(),
-        };
+        const formData = new FormData();
+        formData.append('fullName', $('#fullName').val());
+        formData.append('email', $('#email').val());
+        formData.append('phoneNumber', $('#phoneNumber').val());
+        formData.append('address', $('#address').val());
+        formData.append('occupation', $('#occupation').val());
+        formData.append('maritalStatus', $('#maritalStatus').val());
+        formData.append('serviceType', $('#serviceType').val());
+        formData.append('subService', $('#subService').val());
+        formData.append('description', $('#description').val());
+
+        // Check if a file is selected
+        const fileInput = $('#file')[0];
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            formData.append('file', file);
+        }
 
         // Send AJAX request to server to create the ticket
         $.ajax({
             url: '/create-ticket', 
             method: 'POST',
             data: formData,
+            processData: false,  // Important: Don't process the data
+            contentType: false,  // Important: Don't set content type
             success: function(response) {
                 if (response.status === 'ok') {
                     // Show success message using iziToast
@@ -358,7 +377,7 @@
                     $('#message').text('Our agent will contact you as soon as possible.');
 
                     // Add a button to go back to the dashboard
-                    const dashboardButton = $('<button>')
+                    const dashboardButton = $('<button>') 
                         .text('Go to Dashboard')
                         .addClass('bg-[#3A4A8A] text-white px-6 py-2 rounded-md shadow-md hover:bg-[#2E376F] transition duration-200')
                         .on('click', function() {

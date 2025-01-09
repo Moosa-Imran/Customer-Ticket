@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const multer = require('multer');
 const { ObjectId } = require('mongodb'); 
 const nodemailer = require('nodemailer');;
 const { v4: uuidv4 } = require('uuid')
@@ -7,6 +8,28 @@ const router = express.Router();
 const dotenv = require('dotenv');
 
 dotenv.config(); 
+
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'public/uploads/');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = ['image/', 'application/pdf'];
+    if (allowedTypes.some(type => file.mimetype.startsWith(type))) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only image and PDF files are allowed!'), false);
+    }
+};
+
+const upload = multer({ storage, fileFilter });
 
 
 // Protected Route Middleware
@@ -128,19 +151,18 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Route to handle ticket creation with conversation
-router.post('/create-ticket', async (req, res) => {
+// Route to handle ticket creation with file upload
+router.post('/create-ticket', upload.single('file'), async (req, res) => {
     try {
-        const { fullName, email, phoneNumber, address, serviceType, subService, description } = req.body;
+        // Extract form data
+        const { fullName, email, phoneNumber, address, occupation, maritalStatus, serviceType, subService, description } = req.body;
 
-        // Generate unique ticket number
         let ticketNo;
         let ticketExists = true;
 
         // Ensure the ticket number is unique
         while (ticketExists) {
             ticketNo = uuidv4().slice(0, 10); // Generate a unique 10-character ticket number
-            // Check if the ticket number already exists in the database
             const existingTicket = await req.app.locals.ticketsDb.collection('All').findOne({ ticketNo });
             if (!existingTicket) {
                 ticketExists = false; // Break the loop when the ticket number is unique
@@ -151,10 +173,20 @@ router.post('/create-ticket', async (req, res) => {
         const conversation = [
             {
                 sender: 'customer',
-                message: description ,
+                message: description,
                 timestamp: new Date()
             }
         ];
+
+        // Check if a file was uploaded
+        if (req.file) {
+            const fileName = req.file.filename; // Save the file name in the database
+            conversation.push({
+                sender: 'customer',
+                message: `$$file:=>${fileName}`, // Add the file reference to the conversation
+                timestamp: new Date()
+            });
+        }
 
         // Prepare the ticket data to be stored
         const ticketData = {
@@ -163,6 +195,8 @@ router.post('/create-ticket', async (req, res) => {
             email,
             phoneNumber,
             address,
+            occupation,
+            maritalStatus,
             serviceType,
             subService,
             status: 'Open', // Default status
@@ -200,10 +234,10 @@ router.post('/ticket/:ticketNo/message', async (req, res) => {
             timestamp: new Date()
         };
 
-        // Push the new message to the conversation array
+        // Push the new message to the conversation array and set status to Open
         await req.app.locals.ticketsDb.collection('All').updateOne(
             { ticketNo },
-            { $push: { conversation: newMessage } }
+            { $push: { conversation: newMessage }, $set: { status: 'Open' } }
         );
 
         res.json({ status: 'ok', message: 'Message sent' });
@@ -213,6 +247,46 @@ router.post('/ticket/:ticketNo/message', async (req, res) => {
         res.status(500).json({ status: 'error', message: 'Something went wrong' });
     }
 });
+
+// Route for file upload in a ticket conversation
+router.post('/ticket/:ticketNo/file-upload', upload.single('file'), async (req, res) => {
+    try {
+        const { ticketNo } = req.params;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({ status: 'error', message: 'No file uploaded' });
+        }
+
+        // Fetch the ticket from the database
+        const ticket = await req.app.locals.ticketsDb.collection('All').findOne({ ticketNo });
+
+        if (!ticket) {
+            return res.status(404).json({ status: 'error', message: 'Ticket not found' });
+        }
+
+        // Create the message with the file prefix
+        const newMessage = {
+            sender: 'customer', // or dynamically fetch from session/authentication
+            message: `$$file:=>${file.filename}`, // Prefix to indicate a file
+            timestamp: new Date()
+        };
+
+        // Push the new message to the conversation array
+        await req.app.locals.ticketsDb.collection('All').updateOne(
+            { ticketNo },
+            { $push: { conversation: newMessage }, $set: { status: 'Open' } }
+        );
+
+        res.json({ status: 'ok', message: 'File uploaded as message' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: 'error', message: 'Something went wrong' });
+    }
+});
+
+
 
 // Route for Logout
 router.post('/logout', (req, res) => {
@@ -277,14 +351,14 @@ router.get('/ticket', async (req, res) => {
         const usersDb = req.app.locals.usersDb;
         const user = await usersDb.collection('Customers').findOne({ _id: new ObjectId(userId) });
         const { tid } = req.query; // Get the ticket number from the query string
-
+        
         // Fetch the ticket from the database
         const ticket = await req.app.locals.ticketsDb.collection('All').findOne({ ticketNo: tid });
-
+        
         if (!ticket) {
             return res.status(404).render('error', { message: 'Ticket not found' });
         }
-
+        
         // Render the ticket details page and pass the ticket data
         res.render('ticket-details', { ticket, user });
     } catch (error) {
@@ -293,9 +367,18 @@ router.get('/ticket', async (req, res) => {
     }
 });
 
-router.get('/settings', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'settings.html'));
-});
+router.get('/settings', isAuthenticated, async (req, res) => {
+    try {
+        // Get user ID from session
+        const userId = req.session.user;
+        const usersDb = req.app.locals.usersDb;
+        const user = await usersDb.collection('Customers').findOne({ _id: new ObjectId(userId) });
 
+        res.render('settings', { user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
 module.exports = router;
