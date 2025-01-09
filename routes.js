@@ -287,7 +287,6 @@ router.post('/ticket/:ticketNo/file-upload', upload.single('file'), async (req, 
 });
 
 
-
 // Route for Logout
 router.post('/logout', (req, res) => {
     req.session.destroy(err => {
