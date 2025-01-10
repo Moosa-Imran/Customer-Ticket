@@ -1,59 +1,61 @@
-const express = require('express');
-const path = require('path');
-const multer = require('multer');
-const { ObjectId } = require('mongodb'); 
-const nodemailer = require('nodemailer');;
-const { v4: uuidv4 } = require('uuid')
+const express = require("express");
+const path = require("path");
+const multer = require("multer");
+const { ObjectId } = require("mongodb");
+const nodemailer = require("nodemailer");
+const emailTemplates = require("./emailTemplates");
+const { v4: uuidv4 } = require("uuid");
 const router = express.Router();
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 
-dotenv.config(); 
+dotenv.config();
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'public/uploads/');
+        cb(null, "public/uploads/");
     },
     filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
-    }
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(
+            null,
+            `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`
+        );
+    },
 });
 
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/', 'application/pdf'];
-    if (allowedTypes.some(type => file.mimetype.startsWith(type))) {
+    const allowedTypes = ["image/", "application/pdf"];
+    if (allowedTypes.some((type) => file.mimetype.startsWith(type))) {
         cb(null, true);
     } else {
-        cb(new Error('Only image and PDF files are allowed!'), false);
+        cb(new Error("Only image and PDF files are allowed!"), false);
     }
 };
 
 const upload = multer({ storage, fileFilter });
-
 
 // Protected Route Middleware
 function isAuthenticated(req, res, next) {
     if (req.session.user) {
         return next();
     } else {
-        return res.redirect('/');
+        return res.redirect("/");
     }
 }
 
-// Create a transporter using Namecheap SMTP settings
 const transporter = nodemailer.createTransport({
-    host: "smtp.privateemail.com",
-    port: 587, 
-    secure: false, // Set to true if using port 465
+    host: "mail.romanianworkers.co.uk", 
+    port: 465, // SMTP Port from the image
+    secure: true, // True since we are using port 465
     auth: {
-        user: process.env.EMAIL, // Email from your .env file
-        pass: process.env.PASSWORD // Password from your .env file
-    }
+        user: process.env.EMAIL, 
+        pass: process.env.EMAIL_PASSWORD,
+    },
 });
 
 // Route for Fetching User's Detials
-router.get('/fetchUser', async (req, res) => {
+router.get("/fetchUser", async (req, res) => {
     // Get the user ID from the session
     const userId = req.session.user ? req.session.user.id : null;
     const usersDb = req.app.locals.usersDb;
@@ -61,39 +63,72 @@ router.get('/fetchUser', async (req, res) => {
     try {
         // Check if the user ID exists
         if (!userId) {
-            return res.status(401).json({ status: false, message: 'User not authenticated.' });
+            return res
+                .status(401)
+                .json({ status: false, message: "User not authenticated." });
         }
 
         // Search for the user in the Customers collection
-        const user = await usersDb.collection('Customers').findOne({ _id: new ObjectId(userId) });
+        const user = await usersDb
+            .collection("Customers")
+            .findOne({ _id: new ObjectId(userId) });
         if (user) {
             // If user is found, send the user data along with status
             res.status(200).json({ status: true, user });
         } else {
             // If user does not exist, send status false
-            res.status(404).json({ status: false, message: 'User not found.' });
+            res.status(404).json({ status: false, message: "User not found." });
         }
     } catch (error) {
-        console.error('Error fetching user:', error);
-        res.status(500).json({ status: false, message: 'Internal server error' });
+        console.error("Error fetching user:", error);
+        res.status(500).json({ status: false, message: "Internal server error" });
     }
 });
 
+// Function to send email
+async function sendEmail(to, subject, htmlContent) {
+    try {
+        const mailOptions = {
+            from: `"Romanian Workers" <${process.env.EMAIL}>`,
+            to: to,
+            subject: subject,
+            html: htmlContent,
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log("Email sent: " + info.response);
+        return info;
+    } catch (error) {
+        console.error("Error sending email:", error);
+        throw new Error("Failed to send email.");
+    }
+}
+
+
 // Signup Route
-router.post('/signup', async (req, res) => {
+router.post("/signup", async (req, res) => {
     const { fullName, email, password } = req.body;
     const usersDb = req.app.locals.usersDb;
 
     try {
         // Check if the email already exists
-        const existingUser = await usersDb.collection('Customers').findOne({ email: email });
+        const existingUser = await usersDb
+            .collection("Customers")
+            .findOne({ email: email });
         if (existingUser) {
-            return res.status(400).json({ status: 'email_exists', message: 'Email already in use.' });
+            return res
+                .status(400)
+                .json({ status: "email_exists", message: "Email already in use." });
         }
 
         // Check password length
         if (password.length < 6) {
-            return res.status(400).json({ status: 'short_password', message: 'Password must be at least 6 characters long.' });
+            return res
+                .status(400)
+                .json({
+                    status: "short_password",
+                    message: "Password must be at least 6 characters long.",
+                });
         }
 
         // Insert the new user into the database
@@ -104,7 +139,10 @@ router.post('/signup', async (req, res) => {
             createdAt: new Date(),
         };
 
-        const result = await usersDb.collection('Customers').insertOne(newUser);
+        const result = await usersDb.collection("Customers").insertOne(newUser);
+
+        const customerEmail = emailTemplates.userSignup(fullName);
+        sendEmail(email, "Welcome to Romanian Workers in UK!", customerEmail);
 
         // Save user session
         req.session.user = {
@@ -112,30 +150,39 @@ router.post('/signup', async (req, res) => {
             username: fullName,
         };
 
-        res.status(201).json({ status: 'success', message: 'Account created successfully!' });
+        const adminEmail = emailTemplates.userSignupAdmin(fullName, email, new Date());
+        sendEmail("info@romanianworkers.co.uk", "New User Signup", adminEmail);
+
+        res.status(201).json({ status: "success", message: "Account created successfully!" });
     } catch (error) {
-        console.error('Error during signup:', error);
-        res.status(500).json({ status: 'error', message: 'Internal server error' });
+        console.error("Error during signup:", error);
+        res.status(500).json({ status: "error", message: "Internal server error" });
     }
 });
 
 // Login Route
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const usersDb = req.app.locals.usersDb;
 
     try {
         // Search for the user by email
-        const user = await usersDb.collection('Customers').findOne({ email: email });
+        const user = await usersDb
+            .collection("Customers")
+            .findOne({ email: email });
 
         // If user is not found
         if (!user) {
-            return res.status(401).json({ status: 'invalid', message: 'Invalid email.' });
+            return res
+                .status(401)
+                .json({ status: "invalid", message: "Invalid email." });
         }
 
         // If password is incorrect
         if (user.password !== password) {
-            return res.status(401).json({ status: 'incorrect', message: 'Incorrect password.' });
+            return res
+                .status(401)
+                .json({ status: "incorrect", message: "Incorrect password." });
         }
 
         // If valid, store user session and create cookie
@@ -144,18 +191,28 @@ router.post('/login', async (req, res) => {
         };
 
         // Send success response
-        res.status(200).json({ status: 'success', message: 'Login successful!' });
+        res.status(200).json({ status: "success", message: "Login successful!" });
     } catch (error) {
-        console.error('Error during login:', error);
-        res.status(500).json({ status: 'error', message: 'Internal server error' });
+        console.error("Error during login:", error);
+        res.status(500).json({ status: "error", message: "Internal server error" });
     }
 });
 
 // Route to handle ticket creation with file upload
-router.post('/create-ticket', upload.single('file'), async (req, res) => {
+router.post("/create-ticket", upload.single("file"), async (req, res) => {
     try {
         // Extract form data
-        const { fullName, email, phoneNumber, address, occupation, maritalStatus, serviceType, subService, description } = req.body;
+        const {
+            fullName,
+            email,
+            phoneNumber,
+            address,
+            occupation,
+            maritalStatus,
+            serviceType,
+            subService,
+            description,
+        } = req.body;
 
         let ticketNo;
         let ticketExists = true;
@@ -163,7 +220,9 @@ router.post('/create-ticket', upload.single('file'), async (req, res) => {
         // Ensure the ticket number is unique
         while (ticketExists) {
             ticketNo = uuidv4().slice(0, 10); // Generate a unique 10-character ticket number
-            const existingTicket = await req.app.locals.ticketsDb.collection('All').findOne({ ticketNo });
+            const existingTicket = await req.app.locals.ticketsDb
+                .collection("All")
+                .findOne({ ticketNo });
             if (!existingTicket) {
                 ticketExists = false; // Break the loop when the ticket number is unique
             }
@@ -172,19 +231,19 @@ router.post('/create-ticket', upload.single('file'), async (req, res) => {
         // Prepare the conversation (with the customer's initial message)
         const conversation = [
             {
-                sender: 'customer',
+                sender: "customer",
                 message: description,
-                timestamp: new Date()
-            }
+                timestamp: new Date(),
+            },
         ];
 
         // Check if a file was uploaded
         if (req.file) {
             const fileName = req.file.filename; // Save the file name in the database
             conversation.push({
-                sender: 'customer',
+                sender: "customer",
                 message: `$$file:=>${fileName}`, // Add the file reference to the conversation
-                timestamp: new Date()
+                timestamp: new Date(),
             });
         }
 
@@ -199,144 +258,176 @@ router.post('/create-ticket', upload.single('file'), async (req, res) => {
             maritalStatus,
             serviceType,
             subService,
-            status: 'Open', // Default status
+            status: "Open", // Default status
             createdAt: new Date(),
             createdBy: new ObjectId(req.session.user.id),
-            conversation // Store the conversation
+            conversation, // Store the conversation
         };
 
         // Insert the ticket into the database
-        await req.app.locals.ticketsDb.collection('All').insertOne(ticketData);
+        await req.app.locals.ticketsDb.collection("All").insertOne(ticketData);
 
         // Send success response with ticket number
-        res.json({ status: 'ok', ticketNo });
+        res.json({ status: "ok", ticketNo });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ status: 'error', message: 'Something went wrong, please try again later.' });
+        res
+            .status(500)
+            .json({
+                status: "error",
+                message: "Something went wrong, please try again later.",
+            });
     }
 });
 
 // Route for sending messages in a ticket conversation
-router.post('/ticket/:ticketNo/message', async (req, res) => {
+router.post("/ticket/:ticketNo/message", async (req, res) => {
     try {
         const { ticketNo } = req.params;
         const { sender, message } = req.body;
-        
-        const ticket = await req.app.locals.ticketsDb.collection('All').findOne({ ticketNo });
+
+        const ticket = await req.app.locals.ticketsDb
+            .collection("All")
+            .findOne({ ticketNo });
 
         if (!ticket) {
-            return res.status(404).json({ status: 'error', message: 'Ticket not found' });
+            return res
+                .status(404)
+                .json({ status: "error", message: "Ticket not found" });
         }
 
         const newMessage = {
             sender,
             message,
-            timestamp: new Date()
+            timestamp: new Date(),
         };
 
         // Push the new message to the conversation array and set status to Open
-        await req.app.locals.ticketsDb.collection('All').updateOne(
-            { ticketNo },
-            { $push: { conversation: newMessage }, $set: { status: 'Open' } }
-        );
+        await req.app.locals.ticketsDb
+            .collection("All")
+            .updateOne(
+                { ticketNo },
+                { $push: { conversation: newMessage }, $set: { status: "Open" } }
+            );
 
-        res.json({ status: 'ok', message: 'Message sent' });
-
+        res.json({ status: "ok", message: "Message sent" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ status: 'error', message: 'Something went wrong' });
+        res.status(500).json({ status: "error", message: "Something went wrong" });
     }
 });
 
 // Route for file upload in a ticket conversation
-router.post('/ticket/:ticketNo/file-upload', upload.single('file'), async (req, res) => {
-    try {
-        const { ticketNo } = req.params;
-        const file = req.file;
+router.post(
+    "/ticket/:ticketNo/file-upload",
+    upload.single("file"),
+    async (req, res) => {
+        try {
+            const { ticketNo } = req.params;
+            const file = req.file;
 
-        if (!file) {
-            return res.status(400).json({ status: 'error', message: 'No file uploaded' });
+            if (!file) {
+                return res
+                    .status(400)
+                    .json({ status: "error", message: "No file uploaded" });
+            }
+
+            // Fetch the ticket from the database
+            const ticket = await req.app.locals.ticketsDb
+                .collection("All")
+                .findOne({ ticketNo });
+
+            if (!ticket) {
+                return res
+                    .status(404)
+                    .json({ status: "error", message: "Ticket not found" });
+            }
+
+            // Create the message with the file prefix
+            const newMessage = {
+                sender: "customer", // or dynamically fetch from session/authentication
+                message: `$$file:=>${file.filename}`, // Prefix to indicate a file
+                timestamp: new Date(),
+            };
+
+            // Push the new message to the conversation array
+            await req.app.locals.ticketsDb
+                .collection("All")
+                .updateOne(
+                    { ticketNo },
+                    { $push: { conversation: newMessage }, $set: { status: "Open" } }
+                );
+
+            res.json({ status: "ok", message: "File uploaded as message" });
+        } catch (error) {
+            console.error(error);
+            res
+                .status(500)
+                .json({ status: "error", message: "Something went wrong" });
         }
-
-        // Fetch the ticket from the database
-        const ticket = await req.app.locals.ticketsDb.collection('All').findOne({ ticketNo });
-
-        if (!ticket) {
-            return res.status(404).json({ status: 'error', message: 'Ticket not found' });
-        }
-
-        // Create the message with the file prefix
-        const newMessage = {
-            sender: 'customer', // or dynamically fetch from session/authentication
-            message: `$$file:=>${file.filename}`, // Prefix to indicate a file
-            timestamp: new Date()
-        };
-
-        // Push the new message to the conversation array
-        await req.app.locals.ticketsDb.collection('All').updateOne(
-            { ticketNo },
-            { $push: { conversation: newMessage }, $set: { status: 'Open' } }
-        );
-
-        res.json({ status: 'ok', message: 'File uploaded as message' });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: 'error', message: 'Something went wrong' });
     }
-});
-
+);
 
 // Route for Logout
-router.post('/logout', (req, res) => {
-    req.session.destroy(err => {
+router.post("/logout", (req, res) => {
+    req.session.destroy((err) => {
         if (err) {
-            return res.status(500).json({ message: 'Logout failed. Please try again later.' });
+            return res
+                .status(500)
+                .json({ message: "Logout failed. Please try again later." });
         }
-        res.clearCookie('connect.sid'); 
-        res.status(200).json({logout: true, message: 'Logout successful!' });
+        res.clearCookie("connect.sid");
+        res.status(200).json({ logout: true, message: "Logout successful!" });
     });
 });
 
 // Dashboard Route
-router.get('/dashboard', isAuthenticated, async (req, res) => {
+router.get("/dashboard", isAuthenticated, async (req, res) => {
     try {
         // Get user ID from session
         const userId = req.session.user;
         const usersDb = req.app.locals.usersDb;
         const ticketsDb = req.app.locals.ticketsDb;
-        const user = await usersDb.collection('Customers').findOne({ _id: new ObjectId(userId) });
-        const tickets = await ticketsDb.collection('All').find({ createdBy: new ObjectId(userId) }).toArray();
+        const user = await usersDb
+            .collection("Customers")
+            .findOne({ _id: new ObjectId(userId) });
+        const tickets = await ticketsDb
+            .collection("All")
+            .find({ createdBy: new ObjectId(userId) })
+            .toArray();
 
         const ticketsData = {
             totalTickets: tickets.length,
-            openTickets: tickets.filter(ticket => ticket.status === 'Open').length,
-            resolvedTickets: tickets.filter(ticket => ticket.status === 'Resolved').length,
-        tickets: tickets.map(ticket => ({
-        serviceType: ticket.serviceType,
-        createdAt: ticket.createdAt,
-        status: ticket.status,
-        ticketNo: ticket.ticketNo
-        }))
+            openTickets: tickets.filter((ticket) => ticket.status === "Open").length,
+            resolvedTickets: tickets.filter((ticket) => ticket.status === "Resolved")
+                .length,
+            tickets: tickets.map((ticket) => ({
+                serviceType: ticket.serviceType,
+                createdAt: ticket.createdAt,
+                status: ticket.status,
+                ticketNo: ticket.ticketNo,
+            })),
         };
 
         // Render the dashboard with the updated data
-        res.render('dashboard', { user, ticketsData });
+        res.render("dashboard", { user, ticketsData });
     } catch (err) {
         console.error(err);
         res.status(500).send("Internal Server Error");
     }
 });
 
-router.get('/create-ticket', isAuthenticated, async (req, res) => {
+router.get("/create-ticket", isAuthenticated, async (req, res) => {
     try {
         // Get user ID from session
         const userId = req.session.user;
         const usersDb = req.app.locals.usersDb;
-        const user = await usersDb.collection('Customers').findOne({ _id: new ObjectId(userId) });
+        const user = await usersDb
+            .collection("Customers")
+            .findOne({ _id: new ObjectId(userId) });
 
         // Render Create Ticket page with the updated data
-        res.render('create-ticket', { user });
+        res.render("create-ticket", { user });
     } catch (err) {
         console.error(err);
         res.status(500).send("Internal Server Error");
@@ -344,36 +435,46 @@ router.get('/create-ticket', isAuthenticated, async (req, res) => {
 });
 
 // Route to handle viewing a specific ticket
-router.get('/ticket', async (req, res) => {
+router.get("/ticket", async (req, res) => {
     try {
         const userId = req.session.user;
         const usersDb = req.app.locals.usersDb;
-        const user = await usersDb.collection('Customers').findOne({ _id: new ObjectId(userId) });
+        const user = await usersDb
+            .collection("Customers")
+            .findOne({ _id: new ObjectId(userId) });
         const { tid } = req.query; // Get the ticket number from the query string
-        
+
         // Fetch the ticket from the database
-        const ticket = await req.app.locals.ticketsDb.collection('All').findOne({ ticketNo: tid });
-        
+        const ticket = await req.app.locals.ticketsDb
+            .collection("All")
+            .findOne({ ticketNo: tid });
+
         if (!ticket) {
-            return res.status(404).render('error', { message: 'Ticket not found' });
+            return res.status(404).render("error", { message: "Ticket not found" });
         }
-        
+
         // Render the ticket details page and pass the ticket data
-        res.render('ticket-details', { ticket, user });
+        res.render("ticket-details", { ticket, user });
     } catch (error) {
         console.error(error);
-        res.status(500).render('error', { message: 'Something went wrong, please try again later.' });
+        res
+            .status(500)
+            .render("error", {
+                message: "Something went wrong, please try again later.",
+            });
     }
 });
 
-router.get('/settings', isAuthenticated, async (req, res) => {
+router.get("/settings", isAuthenticated, async (req, res) => {
     try {
         // Get user ID from session
         const userId = req.session.user;
         const usersDb = req.app.locals.usersDb;
-        const user = await usersDb.collection('Customers').findOne({ _id: new ObjectId(userId) });
+        const user = await usersDb
+            .collection("Customers")
+            .findOne({ _id: new ObjectId(userId) });
 
-        res.render('settings', { user });
+        res.render("settings", { user });
     } catch (err) {
         console.error(err);
         res.status(500).send("Internal Server Error");
